@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Setcon LLC — Plan semanal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; font-size: 16px; }
+
+  .top-bar { background: #1a3a52; color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 100; }
+  .top-bar h1 { font-size: 17px; font-weight: 600; }
+  .top-bar p { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .tabs { display: flex; gap: 6px; margin-top: 12px; }
+  .tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; text-align: center; }
+  .tab.active { background: #fff; color: #1a3a52; }
+  .tab:not(.active) { background: rgba(255,255,255,0.15); color: #fff; }
+
+  .screen { display: none; padding: 14px; }
+  .screen.active { display: block; }
+
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #e8e8e8; }
+  .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 14px; }
+
+  label { display: block; font-size: 14px; font-weight: 500; color: #555; margin-bottom: 5px; margin-top: 12px; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=date], select, textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid #ddd; border-radius: 8px;
+    font-size: 15px; color: #1a1a1a; background: #fff; font-family: inherit;
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #1a3a52; }
+  textarea { resize: none; min-height: 68px; line-height: 1.5; }
+
+  .proy-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 12px; overflow: hidden; }
+  .proy-header { background: #1a3a52; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .proy-header span { font-size: 15px; font-weight: 600; color: #fff; }
+  .proy-header select { width: auto; padding: 5px 10px; font-size: 12px; border-radius: 6px; border: none; background: rgba(255,255,255,0.2); color: #fff; }
+  .proy-header select option { background: #1a3a52; }
+  .proy-body { padding: 16px; }
+  .dias-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .dia-item label { font-size: 12px; color: #888; font-weight: 600; margin-top: 0; margin-bottom: 3px; }
+  .dia-item input { font-size: 13px; padding: 9px 10px; }
+
+  .btn-gen { width: 100%; padding: 16px; background: #1a3a52; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+  .btn-gen:active { opacity: 0.85; }
+
+  /* DASHBOARD */
+  .dash-top { background: #1a3a52; border-radius: 12px; padding: 18px 16px; margin-bottom: 12px; color: #fff; }
+  .dash-top h2 { font-size: 19px; font-weight: 700; }
+  .dash-top p { font-size: 13px; opacity: 0.75; margin-top: 3px; }
+  .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .stat { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 6px; text-align: center; }
+  .stat .n { font-size: 20px; font-weight: 700; }
+  .stat .l { font-size: 11px; opacity: 0.85; margin-top: 2px; text-transform: uppercase; }
+
+  .day-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 10px; overflow: hidden; }
+  .day-head { padding: 11px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; }
+  .day-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .day-head span { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+  .day-count { margin-left: auto; font-size: 12px; color: #888; background: #f0f2f5; padding: 3px 8px; border-radius: 10px; }
+
+  .job { padding: 12px 14px; border-bottom: 1px solid #f4f4f4; }
+  .job:last-child { border-bottom: none; }
+  .job-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .job-id { font-size: 11px; font-weight: 700; color: #1a3a52; letter-spacing: 0.3px; }
+  .job-client { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 2px 0; }
+  .job-task { font-size: 14px; color: #333; line-height: 1.4; }
+  .job-lead { font-size: 12px; color: #888; margin-top: 5px; }
+  .pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+  .pill-p { background: #e4f4e4; color: #1e6b1e; }
+  .pill-w { background: #fff4d4; color: #8a6000; }
+  .pill-d { background: #e4eaf8; color: #1a3a52; }
+
+  /* GOOGLE CHAT SECTION */
+  .gchat-section { margin-bottom: 12px; }
+  .gchat-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #555; margin-bottom: 10px; padding: 0 4px; }
+
+  .gchat-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 10px; overflow: hidden; }
+  .gchat-card-head { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+  .gchat-card-head .crew-name { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+  .gchat-card-head .crew-obras { font-size: 12px; color: #888; }
+  .gchat-preview { padding: 12px 14px; background: #f8f9fa; font-size: 13px; color: #333; line-height: 1.6; white-space: pre-wrap; font-family: monospace; border-bottom: 1px solid #e8e8e8; max-height: 180px; overflow-y: auto; }
+  .btn-copy-crew { width: 100%; padding: 12px; background: #fff; color: #1a3a52; border: none; border-top: 1px solid #e8e8e8; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-copy-crew:active { background: #f0f5f8; }
+  .btn-copy-crew.copied { background: #e4f4e4; color: #1e6b1e; }
+
+  .gchat-all-card { background: #1a3a52; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .gchat-all-head { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .gchat-all-head span { font-size: 15px; font-weight: 700; color: #fff; }
+  .gchat-all-head p { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+  .gchat-all-preview { padding: 12px 16px; background: rgba(0,0,0,0.15); font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.6; white-space: pre-wrap; font-family: monospace; max-height: 200px; overflow-y: auto; }
+  .btn-copy-all { width: 100%; padding: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn-copy-all:active { background: rgba(255,255,255,0.25); }
+  .btn-copy-all.copied { background: #1e6b1e; }
+
+  .notas-block { background: #fffbea; border: 1px solid #f0d060; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+  .notas-block .nt { font-size: 12px; font-weight: 700; color: #8b6800; margin-bottom: 5px; text-transform: uppercase; }
+  .notas-block p { font-size: 14px; color: #5a4400; line-height: 1.5; }
+
+  .dash-footer { text-align: center; font-size: 12px; color: #aaa; padding: 8px 0 24px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Setcon LLC</h1>
+  <p>Plan de trabajo semanal</p>
+  <div class="tabs">
+    <button class="tab active" onclick="irA('form', this)">✏️ Editar</button>
+    <button class="tab" onclick="irA('dash', this)">📋 Dashboard</button>
+    <button class="tab" onclick="irA('chat', this)">💬 Google Chat</button>
+  </div>
+</div>
+
+<!-- PANTALLA 1: FORMULARIO -->
+<div class="screen active" id="screen-form">
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title">Información de la semana</div>
+    <label>Inicio de semana</label>
+    <input type="date" id="fecha-inicio">
+    <label>Fin de semana</label>
+    <input type="date" id="fecha-fin">
+    <label>Project Manager</label>
+    <input type="text" id="pm-nombre" placeholder="Nombre del PM">
+  </div>
+
+  <div id="proyectos-wrap">
+    <div class="proy-card">
+      <div class="proy-header"><span>Proyecto 1</span>
+        <select id="p1-status"><option value="p">En progreso</option><option value="w">Pendiente</option><option value="d">Terminado</option></select>
+      </div>
+      <div class="proy-body">
+        <label>ID de obra</label><input type="text" id="p1-id" placeholder="Ej: 1031">
+        <label>Cliente</label><input type="text" id="p1-client" placeholder="Nombre del cliente">
+        <label>Lead del equipo</label><input type="text" id="p1-lead" placeholder="Nombre del lead">
+        <label>Trabajo a realizar</label><textarea id="p1-desc" placeholder="Descripción general"></textarea>
+        <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.4px;margin-top:12px;margin-bottom:4px;">Tarea por día</div>
+        <div class="dias-grid">
+          <div class="dia-item"><label>Lunes</label><input type="text" id="p1-lun" placeholder="-"></div>
+          <div class="dia-item"><label>Martes</label><input type="text" id="p1-mar" placeholder="-"></div>
+          <div class="dia-item"><label>Miércoles</label><input type="text" id="p1-mie" placeholder="-"></div>
+          <div class="dia-item"><label>Jueves</label><input type="text" id="p1-jue" placeholder="-"></div>
+          <div class="dia-item"><label>Viernes</label><input type="text" id="p1-vie" placeholder="-"></div>
+          <div class="dia-item"><label>Sábado</label><input type="text" id="p1-sab" placeholder="-"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proy-card">
+      <div class="proy-header"><span>Proyecto 2</span>
+        <select id="p2-status"><option value="p">En progreso</option><option value="w">Pendiente</option><option value="d">Terminado</option></select>
+      </div>
+      <div class="proy-body">
+        <label>ID de obra</label><input type="text" id="p2-id" placeholder="Ej: 1039">
+        <label>Cliente</label><input type="text" id="p2-client" placeholder="Nombre del cliente">
+        <label>Lead del equipo</label><input type="text" id="p2-lead" placeholder="Nombre del lead">
+        <label>Trabajo a realizar</label><textarea id="p2-desc" placeholder="Descripción general"></textarea>
+        <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.4px;margin-top:12px;margin-bottom:4px;">Tarea por día</div>
+        <div class="dias-grid">
+          <div class="dia-item"><label>Lunes</label><input type="text" id="p2-lun" placeholder="-"></div>
+          <div class="dia-item"><label>Martes</label><input type="text" id="p2-mar" placeholder="-"></div>
+          <div class="dia-item"><label>Miércoles</label><input type="text" id="p2-mie" placeholder="-"></div>
+          <div class="dia-item"><label>Jueves</label><input type="text" id="p2-jue" placeholder="-"></div>
+          <div class="dia-item"><label>Viernes</label><input type="text" id="p2-vie" placeholder="-"></div>
+          <div class="dia-item"><label>Sábado</label><input type="text" id="p2-sab" placeholder="-"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proy-card">
+      <div class="proy-header"><span>Proyecto 3</span>
+        <select id="p3-status"><option value="p">En progreso</option><option value="w">Pendiente</option><option value="d">Terminado</option></select>
+      </div>
+      <div class="proy-body">
+        <label>ID de obra</label><input type="text" id="p3-id" placeholder="Ej: 1040">
+        <label>Cliente</label><input type="text" id="p3-client" placeholder="Nombre del cliente">
+        <label>Lead del equipo</label><input type="text" id="p3-lead" placeholder="Nombre del lead">
+        <label>Trabajo a realizar</label><textarea id="p3-desc" placeholder="Descripción general"></textarea>
+        <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.4px;margin-top:12px;margin-bottom:4px;">Tarea por día</div>
+        <div class="dias-grid">
+          <div class="dia-item"><label>Lunes</label><input type="text" id="p3-lun" placeholder="-"></div>
+          <div class="dia-item"><label>Martes</label><input type="text" id="p3-mar" placeholder="-"></div>
+          <div class="dia-item"><label>Miércoles</label><input type="text" id="p3-mie" placeholder="-"></div>
+          <div class="dia-item"><label>Jueves</label><input type="text" id="p3-jue" placeholder="-"></div>
+          <div class="dia-item"><label>Viernes</label><input type="text" id="p3-vie" placeholder="-"></div>
+          <div class="dia-item"><label>Sábado</label><input type="text" id="p3-sab" placeholder="-"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proy-card">
+      <div class="proy-header"><span>Proyecto 4</span>
+        <select id="p4-status"><option value="p">En progreso</option><option value="w">Pendiente</option><option value="d">Terminado</option></select>
+      </div>
+      <div class="proy-body">
+        <label>ID de obra</label><input type="text" id="p4-id" placeholder="Ej: 1041">
+        <label>Cliente</label><input type="text" id="p4-client" placeholder="Nombre del cliente">
+        <label>Lead del equipo</label><input type="text" id="p4-lead" placeholder="Nombre del lead">
+        <label>Trabajo a realizar</label><textarea id="p4-desc" placeholder="Descripción general"></textarea>
+        <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.4px;margin-top:12px;margin-bottom:4px;">Tarea por día</div>
+        <div class="dias-grid">
+          <div class="dia-item"><label>Lunes</label><input type="text" id="p4-lun" placeholder="-"></div>
+          <div class="dia-item"><label>Martes</label><input type="text" id="p4-mar" placeholder="-"></div>
+          <div class="dia-item"><label>Miércoles</label><input type="text" id="p4-mie" placeholder="-"></div>
+          <div class="dia-item"><label>Jueves</label><input type="text" id="p4-jue" placeholder="-"></div>
+          <div class="dia-item"><label>Viernes</label><input type="text" id="p4-vie" placeholder="-"></div>
+          <div class="dia-item"><label>Sábado</label><input type="text" id="p4-sab" placeholder="-"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Notas de la semana</div>
+    <textarea id="notas" style="margin-top:0" placeholder="Ej: No vaciar concreto después de las 4 PM. Reunión presupuesto 938 con Julio Gonzales el lunes."></textarea>
+  </div>
+
+  <button class="btn-gen" onclick="generarTodo()">Generar dashboard y mensajes</button>
+  <div style="height:20px"></div>
+</div>
+
+<!-- PANTALLA 2: DASHBOARD -->
+<div class="screen" id="screen-dash">
+  <div id="dash-content" style="margin-top:4px; padding-bottom:8px;"></div>
+</div>
+
+<!-- PANTALLA 3: GOOGLE CHAT -->
+<div class="screen" id="screen-chat">
+  <div id="chat-content" style="margin-top:4px; padding-bottom:8px;"></div>
+</div>
+
+<script>
+const DK = ['lun','mar','mie','jue','vie','sab'];
+const DN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const COL = ['#1a3a52','#1e6b3a','#7a4800','#1a3a52','#7a1a1a','#555'];
+
+function irA(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function ff(str) {
+  if (!str) return '';
+  const [y,m,d] = str.split('-');
+  const M = ['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return parseInt(d) + ' ' + M[parseInt(m)] + ' ' + y;
+}
+
+function getDatos() {
+  const fi = document.getElementById('fecha-inicio').value;
+  const ff2 = document.getElementById('fecha-fin').value;
+  const pm = document.getElementById('pm-nombre').value.trim() || 'PM';
+  const notas = document.getElementById('notas').value.trim();
+  const semana = (fi && ff2) ? ff(fi) + ' – ' + ff(ff2) : 'Semana actual';
+  const proyectos = [1,2,3,4].map(n => ({
+    id: document.getElementById('p'+n+'-id').value.trim(),
+    client: document.getElementById('p'+n+'-client').value.trim(),
+    lead: document.getElementById('p'+n+'-lead').value.trim(),
+    desc: document.getElementById('p'+n+'-desc').value.trim(),
+    status: document.getElementById('p'+n+'-status').value,
+    dias: DK.map(d => document.getElementById('p'+n+'-'+d).value.trim())
+  })).filter(p => p.id || p.client);
+  return { semana, pm, notas, proyectos };
+}
+
+function getPill(v) {
+  if (v==='p') return ['En progreso','pill-p'];
+  if (v==='d') return ['Terminado','pill-d'];
+  return ['Pendiente','pill-w'];
+}
+
+function generarTodo() {
+  const { semana, pm, notas, proyectos } = getDatos();
+  if (!proyectos.length) { alert('Agrega al menos un proyecto.'); return; }
+
+  const porDia = DN.map((nombre, i) => ({
+    nombre, color: COL[i],
+    tareas: proyectos.filter(p => { const t = p.dias[i]; return t && t !== '-'; })
+                     .map(p => ({ ...p, tarea: p.dias[i] }))
+  })).filter(d => d.tareas.length);
+
+  // --- DASHBOARD ---
+  let dh = '<div class="dash-top">';
+  dh += '<h2>Plan de trabajo semanal</h2><p>Setcon LLC — Remodelación y Landscaping</p>';
+  dh += '<div class="dash-stats">';
+  dh += '<div class="stat"><div class="n">' + proyectos.length + '</div><div class="l">Obras</div></div>';
+  dh += '<div class="stat"><div class="n">' + porDia.length + '</div><div class="l">Días</div></div>';
+  dh += '<div class="stat"><div class="n">' + pm + '</div><div class="l">PM</div></div>';
+  dh += '</div></div>';
+  dh += '<div style="font-size:13px;color:#888;margin-bottom:8px;padding:0 2px;">Semana: ' + semana + '</div>';
+
+  porDia.forEach(dia => {
+    dh += '<div class="day-card"><div class="day-head">';
+    dh += '<div class="day-dot" style="background:' + dia.color + '"></div>';
+    dh += '<span>' + dia.nombre + '</span>';
+    dh += '<span class="day-count">' + dia.tareas.length + ' obra' + (dia.tareas.length>1?'s':'') + '</span>';
+    dh += '</div>';
+    dia.tareas.forEach(t => {
+      const [lbl, cls] = getPill(t.status);
+      dh += '<div class="job"><div class="job-top"><div>';
+      dh += '<div class="job-id">Obra ' + t.id + '</div>';
+      dh += '<div class="job-client">' + t.client + '</div>';
+      dh += '<div class="job-task">' + t.tarea + '</div>';
+      if (t.lead) dh += '<div class="job-lead">Lead: ' + t.lead + '</div>';
+      dh += '</div><span class="pill ' + cls + '">' + lbl + '</span>';
+      dh += '</div></div>';
+    });
+    dh += '</div>';
+  });
+
+  if (notas) {
+    dh += '<div class="notas-block"><div class="nt">Notas</div><p>' + notas.replace(/\n/g,'<br>') + '</p></div>';
+  }
+  const hoy = new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+  dh += '<div class="dash-footer">Generado el ' + hoy + ' · PM: ' + pm + '</div>';
+  document.getElementById('dash-content').innerHTML = dh;
+
+  // --- MENSAJES GOOGLE CHAT ---
+  const leads = [...new Set(proyectos.filter(p=>p.lead).map(p=>p.lead))];
+
+  let ch = '';
+
+  // Mensaje GENERAL (todos los crews)
+  let txtGeneral = '🏗️ PLAN SEMANAL — SETCON LLC\n';
+  txtGeneral += '📅 ' + semana + '\n';
+  txtGeneral += '👷 PM: ' + pm + '\n';
+  txtGeneral += '─────────────────────────\n\n';
+  porDia.forEach(dia => {
+    txtGeneral += '📌 ' + dia.nombre.toUpperCase() + '\n';
+    dia.tareas.forEach(t => {
+      txtGeneral += '  • Obra ' + t.id + ' — ' + t.client + '\n';
+      txtGeneral += '    ' + t.tarea + '\n';
+      if (t.lead) txtGeneral += '    Lead: ' + t.lead + '\n';
+    });
+    txtGeneral += '\n';
+  });
+  if (notas) txtGeneral += '⚠️ NOTAS\n' + notas + '\n\n';
+  txtGeneral += '— Setcon LLC';
+
+  ch += '<div class="gchat-section">';
+  ch += '<div class="gchat-title">Mensaje general — todos los crews</div>';
+  ch += '<div class="gchat-all-card">';
+  ch += '<div class="gchat-all-head"><span>Grupo general</span><p>Copia esto y pégalo en el grupo de Google Chat</p></div>';
+  ch += '<div class="gchat-all-preview" id="txt-general">' + escHtml(txtGeneral) + '</div>';
+  ch += '<button class="btn-copy-all" id="btn-gen-all" onclick="copiar(\'txt-general\',\'btn-gen-all\')">Copiar mensaje general</button>';
+  ch += '</div></div>';
+
+  // Mensajes POR CREW
+  if (leads.length) {
+    ch += '<div class="gchat-section">';
+    ch += '<div class="gchat-title">Mensaje por crew — solo sus obras</div>';
+
+    leads.forEach((lead, li) => {
+      const obrasLead = proyectos.filter(p => p.lead === lead);
+      let txt = '📋 TU PLAN DE SEMANA — SETCON LLC\n';
+      txt += '📅 ' + semana + '\n';
+      txt += '👷 ' + lead + '\n';
+      txt += '─────────────────────────\n\n';
+
+      DN.forEach((dia, i) => {
+        const tareasLead = obrasLead.filter(p => { const t = p.dias[i]; return t && t !== '-'; });
+        if (tareasLead.length) {
+          txt += '📌 ' + dia.toUpperCase() + '\n';
+          tareasLead.forEach(t => {
+            txt += '  • Obra ' + t.id + ' — ' + t.client + '\n';
+            txt += '    ' + t.dias[i] + '\n';
+          });
+          txt += '\n';
+        }
+      });
+      if (notas) txt += '⚠️ NOTAS GENERALES\n' + notas + '\n\n';
+      txt += '— Setcon LLC';
+
+      const tid = 'txt-lead-' + li;
+      const bid = 'btn-lead-' + li;
+      ch += '<div class="gchat-card">';
+      ch += '<div class="gchat-card-head">';
+      ch += '<div class="crew-name">' + lead + '</div>';
+      ch += '<div class="crew-obras">' + obrasLead.length + ' obra' + (obrasLead.length>1?'s':'') + '</div>';
+      ch += '</div>';
+      ch += '<div class="gchat-preview" id="' + tid + '">' + escHtml(txt) + '</div>';
+      ch += '<button class="btn-copy-crew" id="' + bid + '" onclick="copiar(\'' + tid + '\',\'' + bid + '\')">Copiar mensaje de ' + lead + '</button>';
+      ch += '</div>';
+    });
+    ch += '</div>';
+  }
+
+  ch += '<div style="height:20px"></div>';
+  document.getElementById('chat-content').innerHTML = ch;
+
+  // Ir a dashboard
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-dash').classList.add('active');
+  document.querySelectorAll('.tab')[1].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copiar(textElemId, btnId) {
+  const texto = document.getElementById(textElemId).textContent;
+  const btn = document.getElementById(btnId);
+  const orig = btn.textContent;
+  const doIt = () => {
+    btn.textContent = '✓ Copiado — pega en Google Chat';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 3000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(doIt);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = texto; ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    doIt();
+  }
+}
+</script>
+</body>
+</html>
